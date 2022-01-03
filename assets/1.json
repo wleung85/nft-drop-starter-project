@@ -1,0 +1,19 @@
+{
+    "name": "HELLO_THERE",
+    "symbol": "",
+    "image": "1.png",
+    "properties": {
+      "files": [
+        {
+          "uri": "1.png",
+          "type": "image/png"
+        }
+      ],
+      "creators": [
+        {
+          "address": "6N2taJTyYCqUnWMS7p3CdwfzdVKiy7boSj9vZtUqxaZL",
+          "share": 100
+        }
+      ]
+    }
+  }
