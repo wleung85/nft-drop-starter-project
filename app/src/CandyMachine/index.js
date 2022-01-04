@@ -26,6 +26,7 @@ const MAX_CREATOR_LEN = 32 + 1 + 1;
 
 const CandyMachine = ({ walletAddress }) => {
   const [machineStats, setMachineStats] = useState(null);
+  const [mints, setMints] = useState([]);
 
   // Actions
   const fetchHashTable = async (hash, metadataEnabled) => {
@@ -308,7 +309,52 @@ const CandyMachine = ({ walletAddress }) => {
       goLiveData,
       goLiveDateTimeString,
     });
+
+    const data = await fetchHashTable(
+      process.env.REACT_APP_CANDY_MACHINE_ID,
+      true
+    );
+    
+    if (data.length !== 0) {
+      const requests = data.map(async (mint) => {
+        // Get URI
+        try {
+          const response = await fetch(mint.data.uri);
+          const parse = await response.json();
+          console.log("Past Minted NFT", mint)
+    
+          // Get image URI
+          return parse.image;
+        } catch(e) {
+          // If any request fails, we'll just disregard it and carry on
+          console.error("Failed retrieving Minted NFT", mint);
+          return null;
+        }
+      });
+    
+      // Wait for all requests to finish
+      const allMints = await Promise.all(requests);
+    
+      // Filter requests that failed
+      const filteredMints = allMints.filter(mint => mint !== null);
+    
+      // Store all the minted image URIs
+      setMints(filteredMints);
+    }
   }
+
+  const renderMintedItems = () => (
+    <div className="gif-container">
+      <p className="sub-text">Minted Items ✨</p>
+      <div className="gif-grid">
+        {mints.map((mint) => (
+          <div className="gif-item" key={mint}>
+            <img src={mint} alt={`Minted NFT ${mint}`} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     getCandyMachineState();
@@ -322,6 +368,7 @@ const CandyMachine = ({ walletAddress }) => {
         <button className="cta-button mint-button" onClick={mintToken}>
           Mint Star Wars Community NFT
         </button>
+        {mints.length > 0 && renderMintedItems()}
       </div>
     )
   );
