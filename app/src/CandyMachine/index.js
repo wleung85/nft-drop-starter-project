@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CountdownTimer from '../CountdownTimer';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Program, Provider, web3 } from '@project-serum/anchor';
 import { MintLayout, TOKEN_PROGRAM_ID, Token } from '@solana/spl-token';
@@ -367,6 +368,22 @@ const CandyMachine = ({ walletAddress }) => {
     </div>
   );
 
+  const renderDropTimer = () => {
+    // Get the current date and dropDate
+    const currentDate = new Date();
+    const dropDate = new Date(machineStats.goLiveData * 1000);
+
+    // If currentDate is before dropDate, render our Countdown component
+    if (currentDate < dropDate) {
+      console.log('Before drop date!');
+      // Don't forget to pass over your dropDate!
+      return <CountdownTimer dropDate={dropDate} />;
+    }
+
+    // Else let's just return the current drop date
+    return <p>{`Drop Date: ${machineStats.goLiveDateTimeString}`}</p>;
+  }
+
   useEffect(() => {
     getCandyMachineState();
   }, []);
@@ -374,15 +391,19 @@ const CandyMachine = ({ walletAddress }) => {
   return (
     machineStats && (
       <div className="machine-container">
-        <p>{`Drop Date: ${machineStats.goLiveDateTimeString}`}</p>
+        {renderDropTimer()}
         <p>{`Items Minted: ${machineStats.itemsRedeemed} / ${machineStats.itemsAvailable}`}</p>
-        <button 
-          className="cta-button mint-button" 
-          onClick={mintToken}
-          disabled={isMinting}
-        >
-          Mint Star Wars Community NFT
-        </button>
+        {machineStats.itemsRedeemed === machineStats.itemsAvailable ? (
+          <p className="sub-text">All NFTs are minted!</p>
+        ):
+          <button 
+            className="cta-button mint-button" 
+            onClick={mintToken}
+            disabled={isMinting}
+          >
+            Mint Star Wars Community NFT
+          </button>
+        }
         {isLoadingMints && <p>LOADING MINTS...</p>}
         {mints.length > 0 && renderMintedItems()}
       </div>
